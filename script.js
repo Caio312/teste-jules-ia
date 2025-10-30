@@ -8,6 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const categoriaInput = document.getElementById('categoria');
     const corpoTabela = document.getElementById('corpo-tabela');
     const saldoDisplay = document.getElementById('saldo-display');
+
+    // Elementos do Modal de Transação
+    const modalTransacao = document.getElementById('modal-transacao');
+    const btnNovaTransacao = document.getElementById('btn-nova-transacao');
+    const fecharModalTransacao = document.getElementById('fechar-modal-transacao');
+    const modalTitulo = document.getElementById('modal-titulo');
     const submitButton = formTransacao.querySelector('button[type="submit"]');
 
     // Elementos de Feedback
@@ -27,16 +33,23 @@ document.addEventListener('DOMContentLoaded', () => {
         despesa: ['Alimentação', 'Moradia', 'Transporte', 'Lazer', 'Saúde', 'Outros']
     };
 
-    // --- FUNÇÕES DE FEEDBACK ---
+    // --- FUNÇÕES DO MODAL DE TRANSAÇÃO ---
+    const abrirModalTransacao = () => {
+        atualizarTextoBotao();
+        modalTransacao.classList.add('mostrar');
+    };
 
+    const fecharModalTransacaoFunc = () => {
+        modalTransacao.classList.remove('mostrar');
+        cancelarEdicao();
+    };
+
+    // --- FUNÇÕES DE FEEDBACK ---
     const mostrarNotificacao = (mensagem, tipo = 'sucesso') => {
         notificacao.textContent = mensagem;
         notificacao.className = `notificacao ${tipo}`;
         notificacao.classList.add('mostrar');
-
-        setTimeout(() => {
-            notificacao.classList.remove('mostrar');
-        }, 3000);
+        setTimeout(() => notificacao.classList.remove('mostrar'), 3000);
     };
 
     const mostrarModalConfirmacao = (mensagem, callbackConfirmacao) => {
@@ -64,47 +77,39 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- FUNÇÕES DE MANIPULAÇÃO DE DADOS ---
-
-    const salvarNoLocalStorage = () => {
-        localStorage.setItem('transacoes', JSON.stringify(transacoes));
-    };
+    const salvarNoLocalStorage = () => localStorage.setItem('transacoes', JSON.stringify(transacoes));
 
     const adicionarTransacao = (descricao, valor, tipo, categoria) => {
         if (descricao.trim() === '' || isNaN(valor) || valor === 0) {
             mostrarNotificacao('Por favor, preencha todos os campos corretamente.', 'erro');
             return;
         }
-
         const novaTransacao = { id: Date.now(), descricao, valor: parseFloat(valor), tipo, categoria, data: new Date().toISOString() };
         transacoes.push(novaTransacao);
-
         salvarNoLocalStorage();
         atualizarInterface();
-        limparFormulario();
+        fecharModalTransacaoFunc();
         mostrarNotificacao('Transação adicionada com sucesso!');
     };
 
     const editarTransacao = (id, novosValores) => {
         const index = transacoes.findIndex(t => t.id === id);
         if (index === -1) return;
-
         transacoes[index] = { ...transacoes[index], ...novosValores };
-
         salvarNoLocalStorage();
-        cancelarEdicao();
         atualizarInterface();
+        fecharModalTransacaoFunc();
         mostrarNotificacao('Transação atualizada com sucesso!');
     };
 
     const excluirTransacao = (id) => {
-        transacoes = transacoes.filter(transacao => transacao.id !== id);
+        transacoes = transacoes.filter(t => t.id !== id);
         salvarNoLocalStorage();
         atualizarInterface();
         mostrarNotificacao('Transação excluída com sucesso.');
     };
 
     // --- LÓGICA DE EDIÇÃO ---
-
     const iniciarEdicao = (id) => {
         const transacao = transacoes.find(t => t.id === id);
         if (!transacao) return;
@@ -112,34 +117,41 @@ document.addEventListener('DOMContentLoaded', () => {
         modoEdicao = true;
         idEmEdicao = id;
 
+        modalTitulo.textContent = 'Editar Transação';
         descricaoInput.value = transacao.descricao;
         valorInput.value = transacao.valor;
         tipoInput.value = transacao.tipo;
-
         popularCategorias();
         categoriaInput.value = transacao.categoria;
+        atualizarTextoBotao();
 
-        submitButton.textContent = 'Atualizar Transação';
-        descricaoInput.focus();
+        abrirModalTransacao();
     };
 
     const cancelarEdicao = () => {
         modoEdicao = false;
         idEmEdicao = null;
-        submitButton.textContent = 'Adicionar Transação';
+        modalTitulo.textContent = 'Nova Transação';
         limparFormulario();
+        atualizarTextoBotao();
     };
 
     // --- FUNÇÕES DE CÁLCULO ---
     const calcularSaldo = () => transacoes.reduce((acc, t) => t.tipo === 'receita' ? acc + t.valor : acc - t.valor, 0);
 
     // --- FUNÇÕES DE INTERFACE (DOM) ---
+    const atualizarTextoBotao = () => {
+        if (modoEdicao) {
+            submitButton.textContent = 'Atualizar Transação';
+        } else {
+            const tipo = tipoInput.value;
+            submitButton.textContent = tipo === 'receita' ? 'Salvar Receita' : 'Salvar Despesa';
+        }
+    };
 
     const popularCategorias = () => {
         const tipoSelecionado = tipoInput.value;
-        categoriaInput.innerHTML = categorias[tipoSelecionado]
-            .map(cat => `<option value="${cat}">${cat}</option>`)
-            .join('');
+        categoriaInput.innerHTML = categorias[tipoSelecionado].map(cat => `<option value="${cat}">${cat}</option>`).join('');
     };
 
     const formatarMoeda = (valor) => valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -152,24 +164,29 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderizarExtrato = () => {
-        corpoTabela.innerHTML = transacoes
-            .map(transacao => {
-                const classeValor = transacao.tipo === 'receita' ? 'receita' : 'despesa';
-                const sinal = transacao.tipo === 'receita' ? '' : '- ';
-                return `
-                    <tr>
-                        <td>${formatarData(transacao.data)}</td>
-                        <td>${transacao.descricao}</td>
-                        <td>${transacao.categoria || 'N/A'}</td>
-                        <td class="${classeValor}">${transacao.tipo.charAt(0).toUpperCase() + transacao.tipo.slice(1)}</td>
-                        <td class="${classeValor}">${sinal}${formatarMoeda(Math.abs(transacao.valor))}</td>
-                        <td>
-                            <button class="acoes-btn btn-editar" data-id="${transacao.id}" title="Editar">✏️</button>
-                            <button class="acoes-btn btn-excluir" data-id="${transacao.id}" title="Excluir">🗑️</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+        corpoTabela.innerHTML = transacoes.map(transacao => {
+            const classeValor = transacao.tipo === 'receita' ? 'receita' : 'despesa';
+            const sinal = transacao.tipo === 'receita' ? '' : '- ';
+            return `
+                <tr>
+                    <td>${formatarData(transacao.data)}</td>
+                    <td>${transacao.descricao}</td>
+                    <td>${transacao.categoria || 'N/A'}</td>
+                    <td class="${classeValor}">${transacao.tipo.charAt(0).toUpperCase() + transacao.tipo.slice(1)}</td>
+                    <td class="${classeValor}">${sinal}${formatarMoeda(Math.abs(transacao.valor))}</td>
+                    <td>
+                        <button class="acoes-btn btn-editar" data-id="${transacao.id}" title="Editar">
+                            <span class="btn-icon">✏️</span>
+                            <span class="btn-label">Editar</span>
+                        </button>
+                        <button class="acoes-btn btn-excluir" data-id="${transacao.id}" title="Excluir">
+                            <span class="btn-icon">🗑️</span>
+                            <span class="btn-label">Excluir</span>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     };
 
     const limparFormulario = () => {
@@ -184,8 +201,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- EVENT LISTENERS ---
+    btnNovaTransacao.addEventListener('click', abrirModalTransacao);
+    fecharModalTransacao.addEventListener('click', fecharModalTransacaoFunc);
+    modalTransacao.addEventListener('click', (e) => {
+        if (e.target === modalTransacao) fecharModalTransacaoFunc();
+    });
 
-    tipoInput.addEventListener('change', popularCategorias);
+    tipoInput.addEventListener('change', () => {
+        popularCategorias();
+        atualizarTextoBotao();
+    });
 
     formTransacao.addEventListener('submit', (event) => {
         event.preventDefault();
@@ -207,9 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (target.classList.contains('btn-editar')) {
             iniciarEdicao(id);
         } else if (target.classList.contains('btn-excluir')) {
-            mostrarModalConfirmacao('Tem certeza que deseja excluir esta transação?', () => {
-                excluirTransacao(id);
-            });
+            mostrarModalConfirmacao('Tem certeza que deseja excluir esta transação?', () => excluirTransacao(id));
         }
     });
 
