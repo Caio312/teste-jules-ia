@@ -34,6 +34,11 @@
                     <option value="despesa">Despesa</option>
                 </select>
 
+                <label for="categoria">Categoria:</label>
+                <select id="categoria" required>
+                    <!-- Options are populated dynamically by JS -->
+                </select>
+
                 <button type="submit">Adicionar Transação</button>
             </form>
         </section>
@@ -45,6 +50,7 @@
                     <tr>
                         <th>Data</th>
                         <th>Descrição</th>
+                        <th>Categoria</th>
                         <th>Tipo</th>
                         <th>Valor</th>
                         <th>Ações</th>
@@ -57,5 +63,19 @@
     </main>
 
     <script src="script.js" defer></script>
+
+    <!-- Componente de Notificação/Toast -->
+    <div id="notificacao" class="notificacao"></div>
+
+    <!-- Componente de Modal de Confirmação -->
+    <div id="modal-confirmacao" class="modal-overlay">
+        <div class="modal-conteudo">
+            <p id="modal-mensagem"></p>
+            <div class="modal-botoes">
+                <button id="btn-confirmar">Confirmar</button>
+                <button id="btn-cancelar">Cancelar</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
