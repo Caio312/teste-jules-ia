@@ -23,7 +23,7 @@ header {
 }
 
 h1 {
-    font-size: 1.5rem; /* Ajustado para melhor responsividade */
+    font-size: 1.5rem;
 }
 
 h2 {
@@ -64,85 +64,156 @@ section {
     background-color: #2980b9;
 }
 
-/* Resumo */
-#saldo-container {
+/* Resumo de Tarefas */
+#contadores-tarefas {
+    display: flex;
+    justify-content: space-around;
     text-align: center;
 }
 
-#saldo-display {
-    font-size: 2.5rem;
+.contador h3 {
+    color: #7f8c8d;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.contador p {
+    font-size: 2rem;
     font-weight: 700;
     color: #2c3e50;
 }
 
-/* Tabela de Extrato */
-#extrato-container {
-    overflow-x: auto;
+/* Ferramentas da Lista */
+#ferramentas-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
 }
 
-#tabela-extrato {
-    width: 100%;
-    border-collapse: collapse;
+#busca-tarefa {
+    flex: 1 1 200px; /* Flexbox para responsividade */
+    padding: 0.7rem;
+    border: 1px solid #bdc3c7;
+    border-radius: 5px;
+    font-size: 1rem;
 }
 
-#tabela-extrato th,
-#tabela-extrato td {
-    padding: 0.9rem;
-    text-align: left;
-    border-bottom: 1px solid #ecf0f1;
+#filtros .filtro-btn {
+    background: none;
+    border: 1px solid #bdc3c7;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-#tabela-extrato th {
+#filtros .filtro-btn.ativo {
+    background-color: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+#ordenacao select {
+    padding: 0.7rem;
+    border: 1px solid #bdc3c7;
+    border-radius: 5px;
+}
+
+/* Lista de Tarefas */
+#lista-tarefas {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.tarefa {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 8px;
     background-color: #ecf0f1;
-    font-weight: 600;
-    color: #34495e;
+    transition: background-color 0.3s;
+    border-left: 5px solid transparent; /* Para a prioridade */
 }
 
-#tabela-extrato tbody tr {
-    transition: background-color 0.2s ease-in-out;
+.tarefa[data-prioridade="alta"] { border-left-color: #e74c3c; }
+.tarefa[data-prioridade="media"] { border-left-color: #f39c12; }
+.tarefa[data-prioridade="baixa"] { border-left-color: #2ecc71; }
+
+.tarefa.concluida {
+    background-color: #f0f2f1;
+    opacity: 0.7;
 }
 
-#tabela-extrato tbody tr:hover {
-    background-color: #eaf5fc;
+.tarefa.concluida .tarefa-texto h3 {
+    text-decoration: line-through;
+    color: #7f8c8d;
 }
 
-.receita {
+.tarefa-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.status-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.checkbox {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #7f8c8d;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
     color: #27ae60;
-    font-weight: 500;
 }
 
-.despesa {
-    color: #c0392b;
-    font-weight: 500;
+.tarefa-texto p {
+    color: #7f8c8d;
+    font-size: 0.9rem;
 }
+
+.tarefa-acoes {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.prioridade-tag {
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: white;
+}
+
+.tarefa[data-prioridade="alta"] .prioridade-tag { background-color: #e74c3c; }
+.tarefa[data-prioridade="media"] .prioridade-tag { background-color: #f39c12; }
+.tarefa[data-prioridade="baixa"] .prioridade-tag { background-color: #2ecc71; }
 
 .acoes-btn {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     color: #7f8c8d;
     transition: color 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.3rem;
 }
+.btn-excluir:hover { color: #e74c3c; }
+.btn-editar:hover { color: #3498db; }
 
-.acoes-btn .btn-label {
-    display: none; /* Escondido por padrão */
-    font-size: 0.9rem;
-}
 
-.btn-excluir:hover {
-    color: #e74c3c;
-}
-
-.btn-editar:hover {
-    color: #3498db;
-}
-
-/* --- Componentes de Feedback e Modais --- */
+/* --- MODAIS E FEEDBACK (reutilizados com pequenos ajustes) --- */
 
 .modal-overlay {
     position: fixed;
@@ -159,18 +230,13 @@ section {
     visibility: hidden;
     transition: opacity 0.3s, visibility 0.3s;
 }
-
-.modal-overlay.mostrar {
-    opacity: 1;
-    visibility: visible;
-}
+.modal-overlay.mostrar { opacity: 1; visibility: visible; }
 
 .modal-conteudo {
     background-color: white;
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    text-align: left;
     max-width: 500px;
     width: 90%;
     position: relative;
@@ -187,39 +253,29 @@ section {
     color: #7f8c8d;
 }
 
-/* Formulário dentro do Modal */
-#form-transacao {
+#form-tarefa {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
-
-#form-transacao label {
-    font-weight: 600;
-    margin-bottom: -0.5rem;
-}
-
-#form-transacao input,
-#form-transacao select,
-#form-transacao button {
+#form-tarefa label { font-weight: 600; margin-bottom: -0.5rem; }
+#form-tarefa input, #form-tarefa select, #form-tarefa button {
     width: 100%;
     padding: 0.8rem;
     border: 1px solid #bdc3c7;
     border-radius: 5px;
     font-size: 1rem;
 }
-
-#form-transacao button {
+#form-tarefa button {
     background-color: #3498db;
     color: white;
     font-weight: 700;
     margin-top: 1rem;
 }
 
-/* Notificação/Toast */
 .notificacao {
     position: fixed;
-    bottom: 20px;
+    bottom: -100px; /* Posição inicial fora da tela */
     left: 50%;
     transform: translateX(-50%);
     background-color: #2c3e50;
@@ -228,56 +284,27 @@ section {
     border-radius: 5px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     z-index: 1002;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s, bottom 0.3s;
+    transition: bottom 0.5s ease-in-out;
 }
+.notificacao.mostrar { bottom: 30px; }
+.notificacao.sucesso { background-color: #27ae60; }
+.notificacao.erro { background-color: #c0392b; }
 
-.notificacao.mostrar {
-    opacity: 1;
-    visibility: visible;
-    bottom: 30px;
-}
-
-/* Modal de Confirmação */
-#modal-confirmacao .modal-conteudo {
-    text-align: center;
-}
-
+#modal-confirmacao .modal-conteudo { text-align: center; }
 .modal-botoes {
+    margin-top: 1.5rem;
     display: flex;
     justify-content: center;
     gap: 1rem;
 }
+.modal-botoes button { padding: 0.7rem 1.5rem; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; }
+#btn-confirmar { background-color: #e74c3c; color: white; }
+#btn-cancelar { background-color: #ecf0f1; color: #34495e; }
 
-.modal-botoes button {
-    padding: 0.7rem 1.5rem;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-#btn-confirmar {
-    background-color: #e74c3c;
-    color: white;
-}
-
-#btn-cancelar {
-    background-color: #ecf0f1;
-    color: #34495e;
-}
-
-/* --- Media Queries para Responsividade --- */
-
-@media (min-width: 768px) {
-    h1 {
-        font-size: 2rem;
-    }
-    .btn-primario {
-        font-size: 1rem;
-    }
-    .acoes-btn .btn-label {
-        display: inline; /* Mostra o texto dos botões em telas maiores */
-    }
+/* --- Media Queries --- */
+@media (max-width: 768px) {
+    header { flex-direction: column; gap: 1rem; }
+    #ferramentas-lista { flex-direction: column; align-items: stretch; }
+    .tarefa { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .tarefa-acoes { width: 100%; justify-content: flex-end; }
 }
